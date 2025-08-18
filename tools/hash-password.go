@@ -1,4 +1,4 @@
-// Password hashing utility for Simple Reminder
+// Password hashing utility for PiVoiceReminder
 // Usage: go run tools/hash-password.go your-password-here
 
 package main

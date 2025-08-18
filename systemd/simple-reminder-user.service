@@ -1,5 +1,5 @@
 [Unit]
-Description=Simple Reminder Service (User)
+Description=PiVoiceReminder Service (User)
 After=basic.target network.target sound.target
 Wants=network.target
 

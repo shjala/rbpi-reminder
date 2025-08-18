@@ -1,6 +1,6 @@
 # Web Interface
 
-This directory contains the web interface files for Simple Reminder's configuration management.
+This directory contains the web interface files for PiVoiceReminder's configuration management.
 
 ## Directory Structure
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "Installing Simple Reminder to user home directory..."
+echo "Installing PiVoiceReminder to user home directory..."
 
 # Check if installation directory already exists
 if [ -d "$HOME/srm" ]; then

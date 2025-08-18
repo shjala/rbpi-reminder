@@ -1,4 +1,4 @@
-// Simple Reminder Configuration Management
+// PiVoiceReminder Configuration Management
 let csrfToken = "";
 let autoRefreshInterval = null;
 
