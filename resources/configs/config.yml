@@ -1,0 +1,61 @@
+# Number of times to remind how much of the task time is left
+notification_repeats: 3
+
+# Message Templates
+# Customize the reminder and announcement messages using Go template syntax
+# Available template variables:
+#   {{.Event}} - The event/task description from your calendar
+#   {{.TimeLeft}} - Time remaining for the current event (e.g., "15 minutes")
+#
+# announce_message_template: Played when an event starts (at the scheduled time)
+# remind_message_template: Played during an event to remind you of remaining time
+#
+# Template syntax examples:
+#   "Time for {{.Event}}!"
+#   "{{.Event}} starts now - you have {{.TimeLeft}} remaining"
+#   "Hey! {{.Event}} is happening. {{.TimeLeft}} left to go!"
+announce_message_template: |
+    Hey! Time to tackle "{{.Event}}"! You have "{{.Event}}" scheduled for now.
+    Try just 5 to 10 minutes to get started. You've got this!
+remind_message_template: |
+    Hey! You have {{.TimeLeft}} left for {{.Event}}
+
+##############################################################
+#                  Advanced Configuration                    #
+##############################################################
+
+# Path where tasks are cached offline
+events_path: "resources/events/"
+
+# debug logs enabled or not
+debug_log_enabled: true
+
+# AI TTS (Text-to-Speech) Configuration
+tts_config:
+    model:
+        num_threads: 16 # Number of threads to use for TTS models
+        provider: "cpu" # TTS model provider ("cpu", "gpu", etc.)
+        vits:
+            noise_scale: 0.667 # Noise scale for VITS model
+            noise_scale_w: 0.8 # Noise scale for word duration in VITS
+            length_scale: 1.0 # Length scale for VITS (adjust speech speed)
+    max_num_sentences: 1 # Maximum number of sentences for TTS processing
+
+ai_speech_tts_config:
+    num_threads: 4 # Number of threads to use for TTS models
+    provider: "cpu" # TTS model provider ("cpu", "gpu", etc.)
+    max_num_sentences: 1 # Maximum number of sentences for TTS processing
+    tts_model: "glados" # TTS model name, kokoro, glados, etc.
+
+    # Kokoro-specific model configurations
+    kokoro_speaker: 0 # Default speaker for Kokoro TTS
+    kokoro_model: "resources/models/tts/kokoro-en-v0_19/model.onnx" # Path to Kokoro model
+    kokoro_voices: "resources/models/tts/kokoro-en-v0_19/voices.bin" # Path to espeak-ng data directory for Kokoro
+    kokoro_tokens: "resources/models/tts/kokoro-en-v0_19/tokens.txt" # Path to tokens file for Kokoro
+    kokoro_data_dir: "resources/models/tts/kokoro-en-v0_19/espeak-ng-data" # Path to shared lexicon file
+    kokoro_length_scale: 1.0 # Length scale for Kokoro TTS (adjust speech speed), small -> faster in speech speed; large -> slower
+
+    # GlaDoS
+    glados_model: "resources/models/tts/vits-piper-en_US-glados/en_US-glados.onnx" # Path to GlaDoS model
+    glados_data_dir: "resources/models/tts/vits-piper-en_US-glados/espeak-ng-data" # Path to espeak-ng data directory for GlaDoS
+    glados_tokens: "resources/models/tts/vits-piper-en_US-glados/tokens.txt" # Path to tokens file for GlaDoS

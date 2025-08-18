@@ -1,0 +1,28 @@
+[Unit]
+Description=Simple Reminder Service (User)
+After=basic.target network.target sound.target
+Wants=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/srm
+ExecStart=%h/srm/simple-reminder
+Restart=always
+RestartSec=10
+StandardOutput=journal+console
+StandardError=journal+console
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=false
+ReadWritePaths=%h/srm/resources
+
+# Audio environment for headless Pi
+Environment=ALSA_CARD=0
+Environment=HOME=%h
+Environment=XDG_RUNTIME_DIR=/run/user/%U
+
+[Install]
+WantedBy=default.target

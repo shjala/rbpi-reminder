@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Reminder Configuration</title>
+    <link rel="stylesheet" href="/static/css/main.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="/logout" class="logout-btn">Logout</a>
+            <h1>Simple Reminder Configuration</h1>
+            <p>Manage your application settings</p>
+        </div>
+
+        <div class="nav">
+            <button class="nav-btn active" onclick="showTab('config', event)">Main Configuration</button>
+            <button class="nav-btn" onclick="showTab('secrets', event)">Secrets Configuration</button>
+            <button class="nav-btn" onclick="showTab('logs', event)">Logs</button>
+        </div>
+
+        <div class="content">
+            <div id="config-tab" class="tab-content active">
+                <h2>Main Configuration (config.yml)</h2>
+                <div id="config-message" class="message"></div>
+                <textarea id="config-textarea" placeholder="Loading configuration..."></textarea>
+                <br>
+                <button class="save-btn" onclick="saveConfig()">Save Configuration</button>
+            </div>
+
+            <div id="secrets-tab" class="tab-content">
+                <h2>Secrets Configuration (secrets.yml)</h2>
+                <div id="secrets-message" class="message"></div>
+                <textarea id="secrets-textarea" placeholder="Loading secrets..."></textarea>
+                <br>
+                <button class="save-btn" onclick="saveSecrets()">Save Secrets</button>
+            </div>
+
+            <div id="logs-tab" class="tab-content">
+                <h2>Application Logs</h2>
+                <div id="logs-message" class="message"></div>
+                <div class="logs-controls">
+                    <button class="refresh-btn" onclick="loadLogs()">Refresh Logs</button>
+                    <button class="clear-btn" onclick="clearLogs()">Clear Logs</button>
+                    <label>
+                        <input type="checkbox" id="auto-refresh" onchange="toggleAutoRefresh()"> Auto-refresh (30s)
+                    </label>
+                </div>
+                <textarea id="logs-textarea" readonly placeholder="Loading logs..."></textarea>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/main.js?v=1.1"></script>
+</body>
+
+</html>
