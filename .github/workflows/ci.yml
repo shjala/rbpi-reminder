@@ -1,33 +1,64 @@
 name: CI
 
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+    push:
+        branches: [main]
+    pull_request:
+        branches: [main]
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Go
-      uses: actions/setup-go@v4
-      with:
-        go-version: '1.25'
-    
-    - name: Install system dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y libasound2-dev build-essential
-    
-    - name: Download dependencies
-      run: make deps
-    
-    - name: Build application
-      run: make build
-    
-    - name: Build tools
-      run: make build-tools
+    build:
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                include:
+                    - goos: linux
+                      goarch: amd64
+                      suffix: linux-amd64
+                    - goos: linux
+                      goarch: arm64
+                      suffix: linux-arm64
+
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Set up Go (host build)
+              if: matrix.goarch == 'amd64'
+              uses: actions/setup-go@v4
+              with:
+                  go-version: "1.25"
+
+            # For native amd64 build
+            - name: Build amd64 binary
+              if: matrix.goarch == 'amd64'
+              run: |
+                  sudo apt-get update
+                  sudo apt-get install -y libasound2-dev build-essential
+                  export GOOS=${{ matrix.goos }}
+                  export GOARCH=${{ matrix.goarch }}
+                  export CGO_ENABLED=1
+                  make deps
+                  make build
+                  make build-tools
+
+            # For arm64 build using Docker + QEMU
+            - name: Set up QEMU
+              if: matrix.goarch == 'arm64'
+              uses: docker/setup-qemu-action@v3
+
+            - name: Build arm64 binary in Docker
+              if: matrix.goarch == 'arm64'
+              run: |
+                  docker run --rm --platform linux/arm64 \
+                    -v $PWD:/src -w /src \
+                    golang:1.25 \
+                    bash -c "
+                      apt-get update &&
+                      apt-get install -y build-essential libasound2-dev make &&
+                      export GOOS=${{ matrix.goos }} &&
+                      export GOARCH=${{ matrix.goarch }} &&
+                      export CGO_ENABLED=1 &&
+                      make deps &&
+                      make build &&
+                      make build-tools
+                    "

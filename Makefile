@@ -24,7 +24,7 @@ all: build build-tools
 build:
 	@echo "Building $(BINARY_NAME)..."
 	@mkdir -p $(BIN_DIR)
-	$(GOBUILD) -o $(BINARY_PATH) $(SRC_DIR)
+	$(GOBUILD) -buildvcs=false -o $(BINARY_PATH) $(SRC_DIR)
 	@echo "Build completed successfully!"
 
 # Build tools
@@ -34,7 +34,7 @@ build-tools: build-hash-password
 build-hash-password:
 	@echo "Building $(HASH_PASSWORD_NAME) tool..."
 	@mkdir -p $(BIN_DIR)
-	$(GOBUILD) -o $(HASH_PASSWORD_PATH) $(TOOLS_DIR)/hash-password.go
+	$(GOBUILD) -buildvcs=false -o $(HASH_PASSWORD_PATH) $(TOOLS_DIR)/hash-password.go
 	@echo "Hash-password tool build completed successfully!"
 
 clean:
