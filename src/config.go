@@ -43,8 +43,9 @@ type Config struct {
 	NotificationRepeats int    `yaml:"notification_repeats"`
 
 	// Message Templates
-	AnnounceMessageTemplate string `yaml:"announce_message_template"`
-	RemindMessageTemplate   string `yaml:"remind_message_template"`
+	AnnounceMessageTemplate    string `yaml:"announce_message_template"`
+	AnnounceEndMessageTemplate string `yaml:"announce_end_message_template"`
+	RemindMessageTemplate      string `yaml:"remind_message_template"`
 
 	// TTS Configuration
 	TtsConfig TtsConfig `yaml:"tts_config"`

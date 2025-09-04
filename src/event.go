@@ -198,6 +198,20 @@ func (e *LocalEvent) scheduledForNow() bool {
 	return false
 }
 
+// scheduledNearEnd returns true if now is within a minute of the event's end time.
+func (e *LocalEvent) scheduledNearEnd() bool {
+	if e.Event.EndTime.IsZero() {
+		return false
+	}
+
+	now := time.Now()
+	if now.After(e.Event.EndTime.Add(-time.Minute)) && now.Before(e.Event.EndTime.Add(time.Minute)) {
+		return true
+	}
+
+	return false
+}
+
 // scheduledForToday returns true if the event is scheduled for today.
 func (e *LocalEvent) scheduledForToday() bool {
 	// Truncate both times to midnight to compare only the date part
