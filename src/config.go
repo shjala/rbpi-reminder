@@ -45,6 +45,7 @@ type Config struct {
 	// Message Templates
 	AnnounceMessageTemplate    string `yaml:"announce_message_template"`
 	AnnounceEndMessageTemplate string `yaml:"announce_end_message_template"`
+	CheckStartMessageTemplate  string `yaml:"check_start_message_template"`
 	RemindMessageTemplate      string `yaml:"remind_message_template"`
 
 	// TTS Configuration

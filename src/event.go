@@ -13,9 +13,11 @@ import (
 var syncEvent sync.Mutex
 
 type LocalEvent struct {
-	Event            CalendarEvent
-	Announced        bool
-	LastTimeReminded time.Time
+	Event               CalendarEvent
+	StartAnnounced      bool
+	CheckStartAnnounced bool
+	EndAnnounced        bool
+	LastTimeReminded    time.Time
 }
 
 // saveEventLocally saves the event to the local storage.
@@ -35,7 +37,9 @@ func saveEventLocally(event CalendarEvent) error {
 	// if event exist, set some properties from the existing event
 	existingEvent, err := loadEvent(e.Event.ID + ".json")
 	if err == nil {
-		e.Announced = existingEvent.Announced
+		e.StartAnnounced = existingEvent.StartAnnounced
+		e.CheckStartAnnounced = existingEvent.CheckStartAnnounced
+		e.EndAnnounced = existingEvent.EndAnnounced
 		e.LastTimeReminded = existingEvent.LastTimeReminded
 	}
 
@@ -158,9 +162,21 @@ func removeLocalEventsNotInCalendar(events []CalendarEvent) error {
 	return nil
 }
 
-// setAnnounced sets the event as announced.
-func (e *LocalEvent) setAnnounced() error {
-	e.Announced = true
+// setStartAnnounced sets the event start as announced.
+func (e *LocalEvent) setStartAnnounced() error {
+	e.StartAnnounced = true
+	return e.updateEvent()
+}
+
+// setStartChecked sets the event start checked.
+func (e *LocalEvent) setStartChecked() error {
+	e.CheckStartAnnounced = true
+	return e.updateEvent()
+}
+
+// setEndAnnounced sets the event end as announced.
+func (e *LocalEvent) setEndAnnounced() error {
+	e.EndAnnounced = true
 	return e.updateEvent()
 }
 

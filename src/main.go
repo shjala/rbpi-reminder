@@ -62,7 +62,7 @@ func main() {
 	// remind pending tasks periodocally
 	for {
 		remindCurrentEvents()
-		time.Sleep(30 * time.Second)
+		time.Sleep(10 * time.Second)
 	}
 }
 

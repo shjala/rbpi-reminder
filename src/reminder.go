@@ -22,18 +22,42 @@ func remindCurrentEvents() {
 
 	for _, e := range events {
 		if shouldAnnounceEventStart(&e) {
-			e.setAnnounced()
+			logDebug("Announcing event start")
+			// Set event announced and reminded, otherwise last reminded
+			// remains zero and we will remind the task immediately.
+			e.setStartAnnounced()
+			e.setReminded()
+			// Announce it
 			text := renderAnnounceStartMessage(&e)
 			announceTask(text)
+			// if we just announced the start, don't check for reminders
+			continue
+		}
+		if shouldCheckEventStarted(&e) {
+			logDebug("Checking event started")
+			// Set event start checked
+			e.setStartChecked()
+			// Announce event start
+			text := renderCheckStartMessage(&e)
+			announceTask(text)
+			// if we checked for start, don't check for other conditions
 			continue
 		}
 		if shouldRemindEvent(&e) {
+			logDebug("Reminding event")
+			// Set reminded time to now
 			e.setReminded()
+			// Remind it
 			text := renderRemindMessage(&e)
 			announceTask(text)
+			// if we just reminded, don't check for end
+			continue
 		}
 		if shouldAnnounceEventEnd(&e) {
-			e.setAnnounced()
+			logDebug("Announcing event end")
+			// Set event end announced
+			e.setEndAnnounced()
+			// Announce event end
 			text := renderAnnounceEndMessage(&e)
 			announceTask(text)
 		}
@@ -41,7 +65,20 @@ func remindCurrentEvents() {
 }
 
 func shouldAnnounceEventStart(e *LocalEvent) bool {
-	if !e.Announced && e.scheduledForToday() && e.scheduledForNow() {
+	if !e.StartAnnounced && e.scheduledForToday() && e.scheduledForNow() {
+		return true
+	}
+
+	return false
+}
+
+func shouldCheckEventStarted(e *LocalEvent) bool {
+	if !e.scheduledForToday() || !e.StartAnnounced || e.CheckStartAnnounced {
+		return false
+	}
+
+	// If we one minute is passed since the event started, check if it has started
+	if time.Now().After(e.Event.StartTime.Add(time.Minute)) {
 		return true
 	}
 
@@ -49,7 +86,7 @@ func shouldAnnounceEventStart(e *LocalEvent) bool {
 }
 
 func shouldAnnounceEventEnd(e *LocalEvent) bool {
-	if e.scheduledForToday() && e.scheduledNearEnd() {
+	if !e.EndAnnounced && e.scheduledForToday() && e.scheduledNearEnd() {
 		return true
 	}
 
@@ -58,16 +95,11 @@ func shouldAnnounceEventEnd(e *LocalEvent) bool {
 
 func shouldRemindEvent(e *LocalEvent) bool {
 	now := time.Now()
-	if e.Event.EndTime.IsZero() || now.Before(e.Event.StartTime) || now.After(e.Event.EndTime) {
+	if e.EndAnnounced || e.Event.EndTime.IsZero() || now.Before(e.Event.StartTime) || now.After(e.Event.EndTime) {
 		return false
 	}
 
-	// remind for the first time
-	if e.LastTimeReminded.IsZero() {
-		return true
-	}
-
-	// remind at every (totalDuration / NotificationRepeats) times
+	// check if we are in remiding period, which is every (totalDuration / NotificationRepeats) times
 	reminderInterval := e.Event.EndTime.Sub(e.Event.StartTime) / time.Duration(SysConfig.NotificationRepeats)
 	if now.After(e.LastTimeReminded.Add(reminderInterval)) {
 		return true
@@ -88,7 +120,7 @@ func renderAnnounceStartMessage(e *LocalEvent) string {
 		tmplText = "Hey! Time to tackle \"{{.Event}}\"! You have \"{{.Event}}\" scheduled for now."
 	}
 
-	tmpl, err := template.New("announce").Parse(tmplText)
+	tmpl, err := template.New("announce_start").Parse(tmplText)
 	if err != nil {
 		logError("failed to parse announce template: %v", err)
 		return defaultConfig
@@ -116,7 +148,7 @@ func renderAnnounceEndMessage(e *LocalEvent) string {
 		tmplText = "Hey! The \"{{.Event}}\" is over now!"
 	}
 
-	tmpl, err := template.New("announce").Parse(tmplText)
+	tmpl, err := template.New("announce_end").Parse(tmplText)
 	if err != nil {
 		logError("failed to parse announce template: %v", err)
 		return defaultConfig
@@ -131,6 +163,34 @@ func renderAnnounceEndMessage(e *LocalEvent) string {
 	var buf bytes.Buffer
 	if err := tmpl.Execute(&buf, data); err != nil {
 		logError("failed to execute announce template: %v", err)
+		return defaultConfig
+	}
+
+	return buf.String()
+}
+
+func renderCheckStartMessage(e *LocalEvent) string {
+	defaultConfig := fmt.Sprintf("Hey! Did you start \"%s\"?", e.Event.Description)
+	tmplText := SysConfig.CheckStartMessageTemplate
+	if tmplText == "" {
+		tmplText = "Hey! Did you start \"{{.Event}}\"?"
+	}
+
+	tmpl, err := template.New("checkstart").Parse(tmplText)
+	if err != nil {
+		logError("failed to parse checkstart template: %v", err)
+		return defaultConfig
+	}
+
+	data := struct {
+		Event string
+	}{
+		Event: e.Event.Description,
+	}
+
+	var buf bytes.Buffer
+	if err := tmpl.Execute(&buf, data); err != nil {
+		logError("failed to execute checkstart template: %v", err)
 		return defaultConfig
 	}
 
